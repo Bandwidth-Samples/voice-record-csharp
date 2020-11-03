@@ -21,8 +21,9 @@ namespace Server.Controllers
         {
             _logger.LogInformation($"{Request.Path.Value} requested.");
 
-            var fileStream = new FileStream("Tone.mp3", FileMode.Open);
+            using var fileStream = new FileStream("Tone.mp3", FileMode.Open);
 
+            // Return the audio "tone" file stream when requested by Bandwidth's services.
             return new FileStreamResult(fileStream, new MediaTypeHeaderValue("audio/mp3"));
         }
     }
