@@ -52,7 +52,6 @@ namespace Server.Controllers
 
             var record = new Record
             {
-                RecordCompleteUrl = "/callbacks/recordCompleteCallback",
                 RecordingAvailableUrl = "/callbacks/recordingAvailableCallback"
             };
 
@@ -64,22 +63,6 @@ namespace Server.Controllers
             );
 
             return new OkObjectResult(response.ToBXML());
-        }
-
-        [HttpPost("callAnsweredCallback")]
-        public ActionResult CallAnsweredCallback()
-        {
-            _logger.LogInformation($"{Request.Path.Value} requested.");
-
-            return new OkResult();
-        }
-
-        [HttpPost("recordCompleteCallback")]
-        public ActionResult RecordCompleteCallback()
-        {
-            _logger.LogInformation($"{Request.Path.Value} requested.");
-
-            return new OkResult();
         }
 
         [HttpPost("recordingAvailableCallback")]
