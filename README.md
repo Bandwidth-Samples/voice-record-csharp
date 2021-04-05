@@ -7,6 +7,7 @@
 
 - [Voice Record](#voice-record)
 - [Description](#description)
+    - [Run](#run)
 - [Bandwidth](#bandwidth)
 - [Environmental Variables](#environmental-variables)
 - [Callback URLs](#callback-urls)
@@ -17,6 +18,12 @@
 # Description
 
 When a phone call is placed to the Bandwidth number a short message is spoken as if from a voicemail message. Any voice message which is left will be recorded and saved to a file.
+
+## Run
+
+```sh
+dotnet run --project ./Server
+```
 
 # Bandwidth
 
