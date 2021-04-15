@@ -17,13 +17,13 @@ namespace Server.Controllers
         private readonly ILogger<CallbacksController> _logger;
 
         // Bandwidth provided username. This is used to download voice recordings.
-        private static readonly string Username = System.Environment.GetEnvironmentVariable("BANDWIDTH_USERNAME");
+        private static readonly string Username = System.Environment.GetEnvironmentVariable("BW_USERNAME");
 
         // Bandwidth provided password. This is used to download voice recordings.
-        private static readonly string Password = System.Environment.GetEnvironmentVariable("BANDWIDTH_PASSWORD");
+        private static readonly string Password = System.Environment.GetEnvironmentVariable("BW_PASSWORD");
 
         // Bandwidth provided account id. This is used to download voice recordings.
-        private static readonly string AccountId = System.Environment.GetEnvironmentVariable("BANDWIDTH_ACCOUNT_ID");
+        private static readonly string AccountId = System.Environment.GetEnvironmentVariable("BW_ACCOUNT_ID");
 
         public CallbacksController(ILogger<CallbacksController> logger)
         {
