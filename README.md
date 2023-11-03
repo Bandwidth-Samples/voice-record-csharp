@@ -31,7 +31,7 @@ When the call ends, Bandwidth will start to process the recording. Once this pro
 
 In order to use the Bandwidth API users need to set up the appropriate application at the [Bandwidth Dashboard](https://dashboard.bandwidth.com/) and create API tokens.
 
-To create an application log into the [Bandwidth Dashboard](https://dashboard.bandwidth.com/) and navigate to the `Applications` tab.  Fill out the **New Application** form selecting the service (Messaging or Voice) that the application will be used for.  All Bandwidth services require publicly accessible Callback URLs, for more information on how to set one up see [Callback URLs](#callback-urls).
+To create an application log into the [Bandwidth Dashboard](https://dashboard.bandwidth.com/) and navigate to the `Applications` tab. Fill out the **New Application** form selecting the service that the application will be used for (this sample app uses a voice application). All Bandwidth services require publicly accessible Callback URLs, for more information on how to set one up see [Callback URLs](#callback-urls).
 
 For more information about API credentials see [here](https://dev.bandwidth.com/guides/accountCredentials.html#top)
 
@@ -46,8 +46,11 @@ BW_PASSWORD                   # Your Bandwidth API Secret
 
 # Running the Application
 
+Use the following command to run the application:
+
 ```sh
-dotnet run --project ./Server
+cd VoiceRecord/
+dotnet run
 ```
 
 # Callback URLs
