@@ -11,20 +11,14 @@ var app = builder.Build();
 
 string BW_USERNAME;
 string BW_PASSWORD;
-string BW_MESSAGING_APPLICATION_ID;
 string BW_ACCOUNT_ID;
-string BW_NUMBER;
-string USER_NUMBER;
 
 //Setting up environment variables
 try
 {
     BW_USERNAME = Environment.GetEnvironmentVariable("BW_USERNAME");
     BW_PASSWORD = Environment.GetEnvironmentVariable("BW_PASSWORD");
-    BW_MESSAGING_APPLICATION_ID = Environment.GetEnvironmentVariable("BW_MESSAGING_APPLICATION_ID");
     BW_ACCOUNT_ID = Environment.GetEnvironmentVariable("BW_ACCOUNT_ID");
-    BW_NUMBER = Environment.GetEnvironmentVariable("BW_NUMBER");
-    USER_NUMBER = Environment.GetEnvironmentVariable("USER_NUMBER");
 }
 catch (Exception)
 {
