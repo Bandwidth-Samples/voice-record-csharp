@@ -1,7 +1,6 @@
 using System.Reflection;
 using Bandwidth.Standard.Api;
 using Bandwidth.Standard.Client;
-using Bandwidth.Standard.Model;
 using Bandwidth.Standard.Model.Bxml;
 using Bandwidth.Standard.Model.Bxml.Verbs;
 using Newtonsoft.Json;
