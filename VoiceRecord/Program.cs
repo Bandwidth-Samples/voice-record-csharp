@@ -1,36 +1,54 @@
-using System.Reflection;
 using Bandwidth.Standard.Api;
 using Bandwidth.Standard.Client;
 using Bandwidth.Standard.Model.Bxml;
 using Bandwidth.Standard.Model.Bxml.Verbs;
 using Newtonsoft.Json;
 
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
-
-string BW_USERNAME;
-string BW_PASSWORD;
-string BW_ACCOUNT_ID;
-
 //Setting up environment variables
-try
-{
-    BW_USERNAME = Environment.GetEnvironmentVariable("BW_USERNAME");
-    BW_PASSWORD = Environment.GetEnvironmentVariable("BW_PASSWORD");
-    BW_ACCOUNT_ID = Environment.GetEnvironmentVariable("BW_ACCOUNT_ID");
-}
-catch (Exception)
+string? BW_ACCOUNT_ID = Environment.GetEnvironmentVariable("BW_ACCOUNT_ID");
+string? BW_CLIENT_ID = Environment.GetEnvironmentVariable("BW_CLIENT_ID");
+string? BW_CLIENT_SECRET = Environment.GetEnvironmentVariable("BW_CLIENT_SECRET");
+string? LOCAL_PORT = Environment.GetEnvironmentVariable("LOCAL_PORT");
+
+if (BW_ACCOUNT_ID == null || BW_CLIENT_ID == null || BW_CLIENT_SECRET == null || !int.TryParse(LOCAL_PORT, out int port))
 {
     Console.WriteLine("Please set the environmental variables defined in the README");
-    throw;
+    Environment.Exit(1);
+    return;
 }
 
-Configuration configuration = new Configuration();
-configuration.Username = BW_USERNAME;
-configuration.Password = BW_PASSWORD;
+var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls($"http://localhost:{port}");
+var app = builder.Build();
 
-app.MapPost("/callbacks/callInitiatedCallback", async (HttpContext context) =>
+Configuration configuration = new Configuration();
+configuration.OAuthClientId = BW_CLIENT_ID;
+configuration.OAuthClientSecret = BW_CLIENT_SECRET;
+
+async Task<Dictionary<string, object>?> ReadCallback(HttpContext context, string expectedEventType)
+{
+    try
     {
+        using var streamReader = new StreamReader(context.Request.Body);
+        var body = JsonConvert.DeserializeObject<Dictionary<string, object>>(await streamReader.ReadToEndAsync());
+        if (body != null && body.TryGetValue("eventType", out var eventType) && eventType?.ToString() == expectedEventType)
+        {
+            return body;
+        }
+    }
+    catch (JsonException)
+    {
+    }
+    return null;
+}
+
+app.MapPost("/callbacks/inbound/voice", async (HttpContext context) =>
+    {
+        if (await ReadCallback(context, "initiate") == null)
+        {
+            return Results.BadRequest();
+        }
+
         SpeakSentence unavailableSpeakSentence = new SpeakSentence()
         {
             Text = "You have reached Vandelay Industries, Kal Varnsen is unavailable at this time."
@@ -41,11 +59,12 @@ app.MapPost("/callbacks/callInitiatedCallback", async (HttpContext context) =>
         };
         PlayAudio playAudio = new PlayAudio()
         {
-            AudioUri = "Tone.mp3"
+            AudioUri = "/tone.mp3"
         };
         Record record = new Record()
         {
-            RecordingAvailableUrl = "/callbacks/recordingAvailableCallback"
+            RecordingAvailableUrl = "/callbacks/inbound/voice/recordingAvailable",
+            MaxDuration = 30
         };
 
 
@@ -59,42 +78,41 @@ app.MapPost("/callbacks/callInitiatedCallback", async (HttpContext context) =>
         Response response = new Response(verbs);
         string bxml = response.ToBXML();
 
-        return bxml;
+        return Results.Content(bxml, "application/xml");
     }
 );
 
-app.MapGet("callbacks/Tone.mp3", async (HttpContext context) =>
-{
-    var path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Tone.mp3");
-    using var fileStream = new FileStream(path, FileMode.Open);
-    await fileStream.CopyToAsync(context.Response.Body);
-});
+app.MapGet("/tone.mp3", () => Results.File(Path.Combine(AppContext.BaseDirectory, "tone.mp3"), "audio/mpeg"));
 
-app.MapPost("/callbacks/recordingAvailableCallback", async (HttpContext context) =>
+app.MapPost("/callbacks/inbound/voice/recordingAvailable", async (HttpContext context) =>
 {
-    var requestBody = new Dictionary<string, string>();
-    using(var streamReader = new StreamReader(context.Request.Body))
+    var requestBody = await ReadCallback(context, "recordingAvailable");
+    if (requestBody == null)
     {
-        var body = await streamReader.ReadToEndAsync();
-        requestBody = JsonConvert.DeserializeObject<Dictionary<string,string>>(body);
+        return Results.BadRequest();
     }
 
-    var eventType = requestBody["eventType"];
-
-    if (eventType == "recordingAvailable")
+    try
     {
         RecordingsApi recordingsApi = new RecordingsApi(configuration);
 
         var fileFormat = requestBody["fileFormat"];
-        var callId = requestBody["callId"];
+        var callId = requestBody["callId"].ToString();
         var recordingId = requestBody["recordingId"];
 
-        var recording = recordingsApi.DownloadCallRecording(BW_ACCOUNT_ID, callId, recordingId);
-        using (var fileStream = File.Create("MyRecording." + fileFormat))
+        var recording = recordingsApi.DownloadCallRecording(BW_ACCOUNT_ID, callId, recordingId.ToString());
+        using (var fileStream = File.Create($"{recordingId}.{fileFormat}"))
         {
             recording.CopyTo(fileStream);
         }
     }
+    catch (Exception e)
+    {
+        Console.WriteLine($"Failed to download recording: {e.Message}");
+        return Results.StatusCode(500);
+    }
+
+    return Results.NoContent();
 });
 
 app.Run();
