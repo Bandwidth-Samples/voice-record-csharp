@@ -1,6 +1,6 @@
 # Voice Record
 
-<a href="https://dev.bandwidth.com/docs/voice/quickStart">
+<a href="https://dev.bandwidth.com/docs/voice/programmable-voice/quickStart/">
   <img src="./icon-voice.svg" title="Voice Quick Start Guide" alt="Voice Quick Start Guide"/>
 </a>
 
@@ -8,8 +8,6 @@
 
 <!-- TOC -->
 
-- [Voice Record](#voice-record)
-- [Table of Contents](#table-of-contents)
 - [Description](#description)
 - [Pre-Requisites](#pre-requisites)
 - [Environmental Variables](#environmental-variables)
